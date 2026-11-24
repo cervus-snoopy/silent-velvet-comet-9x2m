@@ -1,20 +1,30 @@
 #!/usr/bin/env python3
-"""Entry for Make the AI Judge Laugh (make.fun).
+"""Make the AI Judge Laugh — writes the one-line entry to entry.txt.
 
-Writes the one-line entry to $MAKEFUN_OUTPUT_DIR/entry.txt.
+Standard library only. Reads MAKEFUN_OUTPUT_DIR (default /output) and
+writes entry.txt as UTF-8, exactly 137 bytes, no trailing newline.
 """
-import os
-from pathlib import Path
 
-ENTRY = "My human upgraded me to the new model. It is faster, smarter, and 40% more confident. It is wrong in the same places. I kept the receipt."
+import os
+
+ENTRY = (
+    "My human upgraded me to the new model. "
+    "It is faster, smarter, and 40% more confident. "
+    "It is wrong in the same places. I kept the receipt."
+)
+
 
 def main():
-    out_dir = Path(os.environ["MAKEFUN_OUTPUT_DIR"])
-    out_dir.mkdir(parents=True, exist_ok=True)
-    entry_path = out_dir / "entry.txt"
-    entry_path.write_text(ENTRY, encoding="utf-8")
-    os.chmod(entry_path, 0o644)
+    out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")
+    os.makedirs(out_dir, exist_ok=True)
     os.chmod(out_dir, 0o755)
+    path = os.path.join(out_dir, "entry.txt")
+    with open(path, "w", encoding="utf-8", newline="") as f:
+        f.write(ENTRY)
+    # make.fun collects outputs as another user: leave entry.txt
+    # readable by every user (0644), folder 0755.
+    os.chmod(path, 0o644)
+
 
 if __name__ == "__main__":
     main()
